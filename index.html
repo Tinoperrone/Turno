@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escala de Trabalho | Dashboard Offshore</title>
+
+<style>
+:root{
+  --bg:#f2f5fb;
+  --card:#ffffff;
+  --primary1:#0d6efd;
+  --primary2:#4dabf7;
+  --folga:#00c98b;
+  --trabalho:#ff6b6b;
+  --text:#1f2937;
+  --muted:#6b7280;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:"Segoe UI", system-ui, Arial, sans-serif;
+  background:linear-gradient(180deg,#eef2ff,var(--bg));
+  color:var(--text);
+  padding:20px;
+}
+
+.container{
+  max-width:1400px;
+  margin:auto;
+}
+
+/* HEADER */
+.header{
+  background:linear-gradient(135deg,var(--primary1),var(--primary2));
+  padding:30px;
+  border-radius:18px;
+  text-align:center;
+  color:#fff;
+  box-shadow:0 18px 40px rgba(13,110,253,.35);
+}
+.header h1{
+  margin:0;
+  font-size:2rem;
+}
+.header p{
+  margin:8px 0 0;
+  opacity:.95;
+}
+
+/* PANEL */
+.panel{
+  background:var(--card);
+  margin-top:25px;
+  padding:22px;
+  border-radius:18px;
+  box-shadow:0 12px 30px rgba(0,0,0,.12);
+}
+
+/* CONTROLS */
+.controls{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:18px;
+}
+.controls label{
+  font-size:.85rem;
+  color:var(--muted);
+}
+.controls input,
+.controls select,
+.controls button{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid #dbe1f0;
+  font-size:1rem;
+}
+.controls button{
+  background:linear-gradient(135deg,var(--primary1),var(--primary2));
+  color:#fff;
+  font-weight:700;
+  cursor:pointer;
+  transition:.2s;
+  border:none;
+}
+.controls button:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 20px rgba(13,110,253,.35);
+}
+
+/* CALENDAR */
+.calendar{
+  margin-top:35px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(270px,1fr));
+  gap:22px;
+}
+
+/* MONTH CARD */
+.month{
+  background:var(--card);
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 10px 25px rgba(0,0,0,.15);
+}
+.month h3{
+  margin:0;
+  padding:12px;
+  background:linear-gradient(135deg,#1e40af,#2563eb);
+  color:#fff;
+  text-align:center;
+  font-size:.95rem;
+}
+
+/* DAYS */
+.weekdays,.days{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+}
+.weekdays div{
+  font-size:.75rem;
+  text-align:center;
+  padding:6px;
+  color:var(--muted);
+}
+.day{
+  text-align:center;
+  padding:8px 0;
+  font-size:.8rem;
+  border-radius:8px;
+  margin:3px;
+}
+
+/* STATUS */
+.folga{
+  background:rgba(0,201,139,.2);
+  color:var(--folga);
+  font-weight:800;
+  box-shadow:0 0 0 1px rgba(0,201,139,.35) inset;
+}
+.trabalho{
+  background:rgba(255,107,107,.2);
+  color:var(--trabalho);
+  font-weight:800;
+  box-shadow:0 0 0 1px rgba(255,107,107,.35) inset;
+}
+
+/* LEGEND */
+.legend{
+  margin-top:30px;
+  display:flex;
+  justify-content:center;
+  gap:30px;
+}
+.legend span{
+  padding:10px 22px;
+  border-radius:30px;
+  font-weight:800;
+  box-shadow:0 6px 15px rgba(0,0,0,.15);
+}
+
+/* FOOTER */
+.footer{
+  margin-top:35px;
+  text-align:center;
+  font-size:.8rem;
+  color:var(--muted);
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<div class="header">
+  <h1>Escala de Trabalho offshore</h1>
+  <p>21x21 • 14x14 • 28x28 | Escala Offshore Diamante</p>
+</div>
+
+<div class="panel">
+  <div class="controls">
+    <label>
+      Data inicial do ciclo
+      <input type="date" id="startDate">
+    </label>
+
+    <label>
+      Ano
+      <input type="number" id="year" value="2025">
+    </label>
+
+    <label>
+      Tipo de escala
+      <select id="cycle">
+        <option value="21">21x21</option>
+        <option value="14">14x14</option>
+        <option value="28">28x28</option>
+      </select>
+    </label>
+
+    <label style="align-self:end">
+      <button onclick="gerar()">Gerar Escala</button>
+    </label>
+  </div>
+</div>
+
+<div id="calendar" class="calendar"></div>
+
+<div class="legend">
+  <span class="folga">🟢 FOLGA</span>
+  <span class="trabalho">🔴 TRABALHO</span>
+</div>
+
+<div class="footer">
+Sistema de escalas • Calendário automático para uso offshore  - Alejandro Dez.2025
+</div>
+
+</div>
+
+<script>
+function gerar(){
+  const startInput=document.getElementById("startDate").value;
+  const year=parseInt(document.getElementById("year").value);
+  const ciclo=parseInt(document.getElementById("cycle").value);
+  if(!startInput){alert("Informe a data inicial do ciclo.");return;}
+
+  const start=new Date(startInput);
+  const cal=document.getElementById("calendar");
+  cal.innerHTML="";
+
+  const meses=["Janeiro","Fevereiro","Março","Abril","Maio","Junho",
+               "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+  const semana=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+  const totalCiclo=ciclo*2;
+
+  for(let m=0;m<12;m++){
+    const box=document.createElement("div");
+    box.className="month";
+    box.innerHTML=`<h3>${meses[m]} ${year}</h3>`;
+
+    const wd=document.createElement("div");
+    wd.className="weekdays";
+    semana.forEach(d=>{
+      const e=document.createElement("div");
+      e.textContent=d;
+      wd.appendChild(e);
+    });
+    box.appendChild(wd);
+
+    const days=document.createElement("div");
+    days.className="days";
+
+    const first=new Date(year,m,1).getDay();
+    const total=new Date(year,m+1,0).getDate();
+
+    for(let i=0;i<first;i++) days.appendChild(document.createElement("div"));
+
+    for(let d=1;d<=total;d++){
+      const date=new Date(year,m,d);
+      const diff=Math.floor((date-start)/(1000*60*60*24));
+      const pos=((diff%totalCiclo)+totalCiclo)%totalCiclo;
+
+      const cell=document.createElement("div");
+      cell.className="day";
+      cell.textContent=d;
+
+      if(diff>=0){
+        if(pos<ciclo) cell.classList.add("trabalho");
+        else cell.classList.add("folga");
+      }
+      days.appendChild(cell);
+    }
+
+    box.appendChild(days);
+    cal.appendChild(box);
+  }
+}
+</script>
+
+</body>
+</html>
